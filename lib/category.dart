@@ -62,39 +62,9 @@ class _CategoryState extends State<Category> {
     return Scaffold(
       backgroundColor: Colors.grey[200],
 
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.black,
-        onPressed: () {},
-        child: const Icon(Icons.qr_code, color: Colors.white),
-      ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
-
-      bottomNavigationBar: BottomAppBar(
-        shape: const CircularNotchedRectangle(),
-        notchMargin: 8,
-        child: SizedBox(
-          height: 60,
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            children: const [
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.dashboard, size: 20),
-                  Text("DASHBOARD", style: TextStyle(fontSize: 10)),
-                ],
-              ),
-              SizedBox(width: 40),
-              Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(Icons.inventory_2, size: 20),
-                  Text("ITEMS", style: TextStyle(fontSize: 10)),
-                ],
-              ),
-            ],
-          ),
-        ),
+      // ✅ AppBar sama seperti Items
+      appBar: AppBar(
+        title: const Text("Category"),
       ),
 
       body: SafeArea(
@@ -167,7 +137,7 @@ class _CategoryState extends State<Category> {
                             ),
                           ),
 
-                          // ✏️ Edit (nanti bisa ditambah)
+                          // ✏️ Edit
                           IconButton(
                             icon: const Icon(Icons.edit),
                             onPressed: () {},
@@ -197,4 +167,4 @@ class _CategoryState extends State<Category> {
       ),
     );
   }
-}
+} 

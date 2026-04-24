@@ -21,10 +21,12 @@ class DBHelper {
         // TABLE ITEMS
         await db.execute('''
           CREATE TABLE items(
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT,
-            stock INTEGER
-          )
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          name TEXT,
+          category TEXT,
+          merk TEXT,
+          sku TEXT
+        )
         ''');
 
         // TABLE CATEGORIES
@@ -70,6 +72,50 @@ class DBHelper {
     await database.update(
       'categories',
       {'name': name},
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+
+  // CRUD ITEMS
+  // ➕ Insert
+  Future<void> insertItem(String name, String category, String merk, String sku) async {
+    final database = await db;
+    await database.insert('items', {
+      'name': name,
+      'category': category,
+      'merk': merk,
+      'sku': sku,
+    });
+  }
+
+  // 📥 Get
+  Future<List<Map<String, dynamic>>> getItems() async {
+    final database = await db;
+    return await database.query('items');
+  }
+
+  // ❌ Delete
+  Future<void> deleteItem(int id) async {
+    final database = await db;
+    await database.delete(
+      'items',
+      where: 'id = ?',
+      whereArgs: [id],
+    );
+  }
+  
+  // ✏️ Update
+  Future<void> updateItem(int id, String name, String category, String merk, String sku) async {
+    final database = await db;
+    await database.update(
+      'items',
+      {
+        'name': name,
+        'category': category,
+        'merk': merk,
+        'sku': sku,
+      },
       where: 'id = ?',
       whereArgs: [id],
     );
