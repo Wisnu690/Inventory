@@ -36,6 +36,15 @@ class DBHelper {
             name TEXT
           )
         ''');
+
+        //table user
+        await db.execute('''
+          CREATE TABLE users(
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT,
+            role TEXT
+            ) 
+        ''');
       },
     );
   }
@@ -120,4 +129,45 @@ class DBHelper {
       whereArgs: [id],
     );
   }
+
+//users
+
+  // ➕ Insert
+Future<void> insertUser(String name, String role) async {
+  final database = await db;
+  await database.insert('users', {
+    'name': name,
+    'role': role,
+  });
+}
+
+// 📥 Get
+Future<List<Map<String, dynamic>>> getUsers() async {
+  final database = await db;
+  return await database.query('users');
+}
+
+// ❌ Delete
+Future<void> deleteUser(int id) async {
+  final database = await db;
+  await database.delete(
+    'users',
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
+
+// ✏️ Update
+Future<void> updateUser(int id, String name, String role) async {
+  final database = await db;
+  await database.update(
+    'users',
+    {
+      'name': name,
+      'role': role,
+    },
+    where: 'id = ?',
+    whereArgs: [id],
+  );
+}
 }
