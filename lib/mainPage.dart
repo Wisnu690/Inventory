@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inventory/dashboard.dart';
 import 'package:inventory/scanner.dart';
-import 'package:inventory/profile.dart';
+import 'package:inventory/profile.dart'; // Pastikan nama import sesuai
 import 'package:inventory/history.dart';
 
 // 🔥 HALAMAN TAMBAHAN (PUSH PAGE)
@@ -18,6 +18,10 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int currentIndex = 0;
+  
+  // 🔥 TAMBAHKAN VARIABLE INI
+  // Untuk mengecek apakah kita sedang membuka halaman profil atau tidak
+  bool isProfileScreen = false; 
 
   // 🔹 LIST PAGE UTAMA (CUMA 3)
   List<Widget> get pages => [
@@ -45,14 +49,12 @@ class _MainPageState extends State<MainPage> {
         const History(),
       ];
 
-  // 🔹 NAVIGASI PROFILE
+  // 🔹 NAVIGASI PROFILE (DIPERBAIKI)
   void goToProfile() {
-    Navigator.push(
-      context,
-      MaterialPageRoute(
-        builder: (context) => const ProfileScreen(),
-      ),
-    );
+    // Jangan gunakan Navigator.push. Ubah saja state-nya.
+    setState(() {
+      isProfileScreen = true;
+    });
   }
 
   @override
@@ -101,7 +103,12 @@ class _MainPageState extends State<MainPage> {
                 // 🔹 PROFILE BUTTON
                 IconButton(
                   onPressed: goToProfile,
-                  icon: const Icon(Icons.person_outline, size: 28),
+                  // Ubah warna icon jika sedang di halaman profile
+                  icon: Icon(
+                    Icons.person_outline, 
+                    size: 28, 
+                    color: isProfileScreen ? Colors.blue : Colors.black, // Opsi tambahan agar user tahu sedang aktif
+                  ),
                 ),
               ],
             ),
@@ -109,8 +116,10 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
 
-      // 🔥 BODY
-      body: pages[currentIndex],
+      // 🔥 BODY (DIPERBAIKI)
+      // Jika isProfileScreen true, tampilkan ProfileScreen.
+      // Jika false, tampilkan halaman dari Bottom Nav (pages[currentIndex]).
+      body: isProfileScreen ? const ProfileScreen() : pages[currentIndex],
 
       // 🔥 FLOATING BUTTON (SCAN)
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
@@ -121,6 +130,7 @@ class _MainPageState extends State<MainPage> {
           onPressed: () {
             setState(() {
               currentIndex = 1;
+              isProfileScreen = false; // Matikan mode profile saat menekan SCAN
             });
           },
           backgroundColor: Colors.black,
@@ -143,11 +153,13 @@ class _MainPageState extends State<MainPage> {
         backgroundColor: const Color(0xFFD9D9D9),
         type: BottomNavigationBarType.fixed,
         currentIndex: currentIndex,
-        selectedItemColor: Colors.black,
+        // Hapus warna biru dari bottom nav jika sedang di halaman profil
+        selectedItemColor: isProfileScreen ? Colors.black54 : Colors.black, 
         unselectedItemColor: Colors.black54,
         onTap: (index) {
           setState(() {
             currentIndex = index;
+            isProfileScreen = false; // Matikan mode profile saat pindah tab bawah
           });
         },
         items: const [
