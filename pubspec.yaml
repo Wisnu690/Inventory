@@ -16,8 +16,15 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
+  flutter_native_splash: ^2.0.0
 
 flutter:
   uses-material-design: true
   assets:
     - assets/images/
+
+flutter_native_splash:
+  color: "#ffffff" # background
+  image: assets/images/Logo.png # icon/logo kamu
+  android: true
+  ios: true
