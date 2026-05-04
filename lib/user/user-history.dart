@@ -1,97 +1,130 @@
 import 'package:flutter/material.dart';
 
-class UserHistory extends StatelessWidget {
+class UserHistory extends StatefulWidget {
   const UserHistory({super.key});
 
   @override
+  State<UserHistory> createState() => _UserHistoryState();
+}
+
+class _UserHistoryState extends State<UserHistory> {
+  String selectedFilter = "ALL";
+
+  @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: ListView(
-        children: [
-          const SizedBox(height: 20),
-
-          // TITLE
-          const Text(
-            "History",
-            style: TextStyle(
-              fontSize: 28,
-              fontWeight: FontWeight.bold,
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          // FILTER BUTTONS
-          Row(
+    return Scaffold(
+      backgroundColor: const Color(0xFFF5F5F5),
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+          child: Column(
             children: [
-              _filterButton("ALL", true),
-              const SizedBox(width: 10),
-              _filterButton("STOCK IN", false),
-              const SizedBox(width: 10),
-              _filterButton("STOCK OUT", false),
+              const SizedBox(height: 10),
+
+              // 🔥 TITLE
+              const Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  "HISTORY",
+                  style: TextStyle(
+                    fontSize: 28,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 20),
+
+              // 🔥 FILTER BUTTONS
+              Row(
+                children: [
+                  _filterButton("ALL"),
+                  const SizedBox(width: 10),
+                  _filterButton("STOCK IN"),
+                  const SizedBox(width: 10),
+                  _filterButton("STOCK OUT"),
+                ],
+              ),
+
+              const SizedBox(height: 20),
+
+              // 🔥 LIST (SCROLLABLE)
+              Expanded(
+                child: ListView(
+                  children: [
+                    // TODAY
+                    const Text(
+                      "TODAY — APR 20",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    _historyCard(isIn: true),
+                    const SizedBox(height: 12),
+                    _historyCard(isIn: false),
+
+                    const SizedBox(height: 30),
+
+                    // YESTERDAY
+                    const Text(
+                      "YESTERDAY — APR 19",
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey,
+                        letterSpacing: 1.5,
+                      ),
+                    ),
+
+                    const SizedBox(height: 10),
+
+                    _historyCard(isIn: true),
+                    const SizedBox(height: 12),
+                    _historyCard(isIn: false),
+                  ],
+                ),
+              ),
             ],
           ),
-
-          const SizedBox(height: 30),
-
-          // TODAY
-          const Text(
-            "TODAY — APR 20",
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-              letterSpacing: 1.5,
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          _historyCard(),
-          const SizedBox(height: 12),
-          _historyCard(),
-
-          const SizedBox(height: 30),
-
-          // YESTERDAY
-          const Text(
-            "YESTERDAY — APR 19",
-            style: TextStyle(
-              fontSize: 12,
-              color: Colors.grey,
-              letterSpacing: 1.5,
-            ),
-          ),
-
-          const SizedBox(height: 10),
-
-          _historyCard(),
-          const SizedBox(height: 12),
-          _historyCard(),
-        ],
-      ),
-    );
-  }
-
-  Widget _filterButton(String text, bool isActive) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive ? Colors.black : Colors.grey[200],
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: Text(
-        text,
-        style: TextStyle(
-          color: isActive ? Colors.white : Colors.black,
-          fontSize: 12,
-          fontWeight: FontWeight.w500,
         ),
       ),
     );
   }
 
-  Widget _historyCard() {
+  // 🔥 FILTER BUTTON (CLICKABLE)
+  Widget _filterButton(String text) {
+    bool isActive = selectedFilter == text;
+
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          selectedFilter = text;
+        });
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
+        decoration: BoxDecoration(
+          color: isActive ? Colors.black : Colors.grey[200],
+          borderRadius: BorderRadius.circular(10),
+        ),
+        child: Text(
+          text,
+          style: TextStyle(
+            color: isActive ? Colors.white : Colors.black,
+            fontSize: 12,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+      ),
+    );
+  }
+
+  // 🔥 HISTORY CARD
+  Widget _historyCard({required bool isIn}) {
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
@@ -107,7 +140,9 @@ class UserHistory extends StatelessWidget {
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
-            child: const Icon(Icons.sync_alt),
+            child: Icon(
+              isIn ? Icons.download : Icons.upload,
+            ),
           ),
 
           const SizedBox(width: 12),
@@ -116,16 +151,16 @@ class UserHistory extends StatelessWidget {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: const [
-                Text(
+              children: [
+                const Text(
                   "Samsung S26 Ultra",
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
-                SizedBox(height: 4),
-                Text(
+                const SizedBox(height: 4),
+                const Text(
                   "SKU-HP-201",
                   style: TextStyle(
                     fontSize: 11,
@@ -136,17 +171,24 @@ class UserHistory extends StatelessWidget {
             ),
           ),
 
-          // RIGHT ICON
+          // RIGHT STATUS
           Container(
-            padding: const EdgeInsets.all(10),
+            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
             decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(10),
+              color: isIn ? Colors.green[100] : Colors.red[100],
+              borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.upload),
+            child: Text(
+              isIn ? "IN" : "OUT",
+              style: TextStyle(
+                color: isIn ? Colors.green : Colors.red,
+                fontSize: 12,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
           ),
         ],
       ),
     );
   }
-} 
+}
