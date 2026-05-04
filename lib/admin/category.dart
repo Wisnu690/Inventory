@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'db.helper.dart';
+import '../db.helper.dart';
 
 class Category extends StatefulWidget {
   const Category({super.key});

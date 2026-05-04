@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'mainpage.dart'; // pastikan ini ada
+import 'package:inventory/admin/mainpage.dart'; // pastikan ini ada
 
 class SplashPage extends StatefulWidget {
   const SplashPage({super.key});

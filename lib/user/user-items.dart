@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
 
-class UserDashboard extends StatelessWidget {
-  const UserDashboard({super.key});
+class UserItems extends StatelessWidget {
+  const UserItems ({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const Center(
-      child: Text("Halaman Dashboard User"),
+      child: Text("Halaman Items User"),
     );
   }
 }

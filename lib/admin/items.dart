@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'db.helper.dart';
+import 'package:inventory/db.helper.dart';
 
 class Items extends StatefulWidget {
   const Items({super.key});
