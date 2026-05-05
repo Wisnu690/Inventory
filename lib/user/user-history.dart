@@ -48,7 +48,7 @@ class _UserHistoryState extends State<UserHistory> {
 
               const SizedBox(height: 20),
 
-              // 🔥 LIST (SCROLLABLE)
+              // 🔥 LIST
               Expanded(
                 child: ListView(
                   children: [
@@ -95,7 +95,7 @@ class _UserHistoryState extends State<UserHistory> {
     );
   }
 
-  // 🔥 FILTER BUTTON (CLICKABLE)
+  // 🔥 FILTER BUTTON
   Widget _filterButton(String text) {
     bool isActive = selectedFilter == text;
 
@@ -123,7 +123,7 @@ class _UserHistoryState extends State<UserHistory> {
     );
   }
 
-  // 🔥 HISTORY CARD
+  // 🔥 HISTORY CARD (ICON STYLE)
   Widget _historyCard({required bool isIn}) {
     return Container(
       padding: const EdgeInsets.all(14),
@@ -140,9 +140,7 @@ class _UserHistoryState extends State<UserHistory> {
               color: Colors.grey[300],
               borderRadius: BorderRadius.circular(10),
             ),
-            child: Icon(
-              isIn ? Icons.download : Icons.upload,
-            ),
+            child: const Icon(Icons.sync_alt),
           ),
 
           const SizedBox(width: 12),
@@ -151,16 +149,16 @@ class _UserHistoryState extends State<UserHistory> {
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const Text(
+              children: const [
+                Text(
                   "Samsung S26 Ultra",
                   style: TextStyle(
                     fontWeight: FontWeight.w600,
                     fontSize: 14,
                   ),
                 ),
-                const SizedBox(height: 4),
-                const Text(
+                SizedBox(height: 4),
+                Text(
                   "SKU-HP-201",
                   style: TextStyle(
                     fontSize: 11,
@@ -171,20 +169,15 @@ class _UserHistoryState extends State<UserHistory> {
             ),
           ),
 
-          // RIGHT STATUS
+          // RIGHT ICON (🔥 IN / OUT pakai icon)
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: isIn ? Colors.green[100] : Colors.red[100],
-              borderRadius: BorderRadius.circular(8),
+              color: Colors.grey[300],
+              borderRadius: BorderRadius.circular(10),
             ),
-            child: Text(
-              isIn ? "IN" : "OUT",
-              style: TextStyle(
-                color: isIn ? Colors.green : Colors.red,
-                fontSize: 12,
-                fontWeight: FontWeight.bold,
-              ),
+            child: Icon(
+              isIn ? Icons.download : Icons.upload,
             ),
           ),
         ],
