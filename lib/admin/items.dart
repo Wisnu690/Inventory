@@ -80,7 +80,7 @@ class _ItemsState extends State<Items> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[200],
+      backgroundColor: Colors.grey[2000],
 
       // ✅ AppBar
       appBar: AppBar(
@@ -199,4 +199,4 @@ class _ItemsState extends State<Items> {
       ),
     );
   }
-}
+} 
