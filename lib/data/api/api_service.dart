@@ -109,4 +109,85 @@ class ApiService {
       return {'success': false, 'message': 'Gagal terhubung ke server: $e'};
     }
   }
+
+
+// GET CATEGORY
+Future<List<dynamic>> getCategories() async {
+  try {
+    final response = await http.get(
+      Uri.parse('$baseUrl/categories'),
+      headers: {
+        'Accept': 'application/json',
+      },
+    );
+
+    if (response.statusCode == 200) {
+      return jsonDecode(response.body);
+    }
+
+    return [];
+  } catch (e) {
+    return [];
+  }
+}
+
+// ADD CATEGORY
+Future<Map<String, dynamic>> addCategory(
+  String name,
+  String description,
+) async {
+  try {
+    final response = await http.post(
+      Uri.parse('$baseUrl/categories'),
+      headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json',
+      },
+      body: jsonEncode({
+        'name': name,
+        'description': description,
+      }),
+    );
+
+    return jsonDecode(response.body);
+  } catch (e) {
+    return {
+      'success': false,
+      'message': e.toString(),
+    };
+  }
+}
+
+// DELETE CATEGORY
+Future<void> deleteCategory(int id) async {
+  await http.delete(
+    Uri.parse('$baseUrl/categories/$id'),
+  );
+}
+
+Future<void> updateCategory(
+  int id,
+  String name,
+  String description,
+) async {
+  final response = await http.put(
+    Uri.parse('$baseUrl/categories/$id'),
+    headers: {
+      'Accept': 'application/json',
+      'Content-Type': 'application/json',
+    },
+    body: jsonEncode({
+      'name': name,
+      'description': description,
+    }),
+  );
+
+  print(response.statusCode);
+  print(response.body);
+}
+
+
+
+
+
 }
