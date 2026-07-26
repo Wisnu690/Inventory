@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:inventory/admin/dashboard.dart';
 import 'package:inventory/admin/scanner.dart';
-import 'package:inventory/admin/profile.dart'; // Pastikan nama import sesuai
+import 'package:inventory/admin/profile.dart';
 import 'package:inventory/admin/history.dart';
 
 // 🔥 HALAMAN TAMBAHAN (PUSH PAGE)
@@ -10,7 +10,12 @@ import 'package:inventory/admin/category.dart';
 import 'package:inventory/admin/user.dart';
 
 class MainPage extends StatefulWidget {
-  const MainPage({super.key});
+  final String userName; // 👈 1. Tambahkan variabel penampung nama
+
+  const MainPage({
+    super.key,
+    this.userName = "Admin", // 👈 Default nilai jika tidak dikirim
+  });
 
   @override
   State<MainPage> createState() => _MainPageState();
@@ -18,40 +23,49 @@ class MainPage extends StatefulWidget {
 
 class _MainPageState extends State<MainPage> {
   int currentIndex = 0;
-  
-  // 🔥 TAMBAHKAN VARIABLE INI
-  // Untuk mengecek apakah kita sedang membuka halaman profil atau tidak
   bool isProfileScreen = false; 
 
-  // 🔹 LIST PAGE UTAMA (CUMA 3)
+  // 🔑 Key untuk memaksa Dashboard reload data saat kembali dari halaman lain
+  Key dashboardKey = UniqueKey();
+
+  void refreshDashboard() {
+    setState(() {
+      dashboardKey = UniqueKey(); // Ganti key agar Dashboard merender ulang
+    });
+  }
+
+  // 🔹 LIST PAGE UTAMA
   List<Widget> get pages => [
         Dashboard(
-          onItemsTap: () {
-            Navigator.push(
+          key: dashboardKey, // Pass Key ke Dashboard
+          onItemsTap: () async {
+            // Tunggu (await) sampai user kembali dari halaman Items
+            await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const Items()),
             );
+            refreshDashboard(); // 🔄 Refresh data setelah kembali
           },
-          onCategoriesTap: () {
-            Navigator.push(
+          onCategoriesTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const Category()),
             );
+            refreshDashboard(); // 🔄 Refresh data setelah kembali
           },
-          onUsersTap: () {
-            Navigator.push(
+          onUsersTap: () async {
+            await Navigator.push(
               context,
               MaterialPageRoute(builder: (context) => const User()),
             );
+            refreshDashboard(); // 🔄 Refresh data setelah kembali
           },
         ),
         const Scanner(),
         const History(),
       ];
 
-  // 🔹 NAVIGASI PROFILE (DIPERBAIKI)
   void goToProfile() {
-    // Jangan gunakan Navigator.push. Ubah saja state-nya.
     setState(() {
       isProfileScreen = true;
     });
@@ -62,7 +76,7 @@ class _MainPageState extends State<MainPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF5F5F5),
 
-      // 🔥 HEADER (TETAP)
+      // HEADER
       appBar: PreferredSize(
         preferredSize: const Size.fromHeight(70),
         child: Container(
@@ -100,14 +114,13 @@ class _MainPageState extends State<MainPage> {
                   ],
                 ),
 
-                // 🔹 PROFILE BUTTON
+                // PROFILE BUTTON
                 IconButton(
                   onPressed: goToProfile,
-                  // Ubah warna icon jika sedang di halaman profile
                   icon: Icon(
                     Icons.person_outline, 
                     size: 28, 
-                    color: isProfileScreen ? Colors.blue : Colors.black, // Opsi tambahan agar user tahu sedang aktif
+                    color: isProfileScreen ? Colors.blue : Colors.black,
                   ),
                 ),
               ],
@@ -116,12 +129,13 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
 
-      // 🔥 BODY (DIPERBAIKI)
-      // Jika isProfileScreen true, tampilkan ProfileScreen.
-      // Jika false, tampilkan halaman dari Bottom Nav (pages[currentIndex]).
-      body: isProfileScreen ? const ProfileScreen() : pages[currentIndex],
+      // BODY
+      // 👈 2. Kirim widget.userName ke ProfileScreen (hapus kata 'const' di depan ProfileScreen)
+      body: isProfileScreen 
+          ? ProfileScreen(userName: widget.userName) 
+          : pages[currentIndex],
 
-      // 🔥 FLOATING BUTTON (SCAN)
+      // FLOATING BUTTON (SCAN)
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: SizedBox(
         height: 70,
@@ -130,7 +144,7 @@ class _MainPageState extends State<MainPage> {
           onPressed: () {
             setState(() {
               currentIndex = 1;
-              isProfileScreen = false; // Matikan mode profile saat menekan SCAN
+              isProfileScreen = false;
             });
           },
           backgroundColor: Colors.black,
@@ -148,18 +162,17 @@ class _MainPageState extends State<MainPage> {
         ),
       ),
 
-      // 🔥 BOTTOM NAV (CUMA 3 MENU)
+      // BOTTOM NAV
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: const Color(0xFFD9D9D9),
         type: BottomNavigationBarType.fixed,
         currentIndex: currentIndex,
-        // Hapus warna biru dari bottom nav jika sedang di halaman profil
         selectedItemColor: isProfileScreen ? Colors.black54 : Colors.black, 
         unselectedItemColor: Colors.black54,
         onTap: (index) {
           setState(() {
             currentIndex = index;
-            isProfileScreen = false; // Matikan mode profile saat pindah tab bawah
+            isProfileScreen = false;
           });
         },
         items: const [

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:inventory/main.dart';
 
 class UserProfile extends StatelessWidget {
   const UserProfile({super.key});
@@ -23,7 +24,7 @@ class UserProfile extends StatelessWidget {
                       color: Colors.grey[300],
                       borderRadius: BorderRadius.circular(15),
                       image: const DecorationImage(
-                        image: NetworkImage('https://via.placeholder.com/120'), // Ganti gambar profil
+                        image: NetworkImage('https://via.placeholder.com/120'),
                         fit: BoxFit.cover,
                       ),
                     ),
@@ -80,16 +81,24 @@ class UserProfile extends StatelessWidget {
                           borderRadius: BorderRadius.circular(10),
                         ),
                       ),
-                      onPressed: () {},
-                      icon: const Icon(Icons.logout, color: Colors.white),
-                      label: const Text(
+                      onPressed: () {
+                        Navigator.pushAndRemoveUntil(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => const LoginPage(),
+                          ),
+                          (route) => false,
+                        );
+                      },
+                      icon: const Icon(Icons.logout, color: Colors.white), // 👈 Ditambahkan
+                      label: const Text(                                     // 👈 Ditambahkan
                         "LOGOUT",
                         style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
                   
-                  const SizedBox(height: 40), // Tambahan jarak bawah agar tidak terlalu mepet
+                  const SizedBox(height: 40),
                 ],
               ),
             ),

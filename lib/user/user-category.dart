@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:inventory/db.helper.dart';
+import '../data/api/api_service.dart';
 
 class UserCategory extends StatefulWidget {
   const UserCategory({super.key});
@@ -9,9 +9,11 @@ class UserCategory extends StatefulWidget {
 }
 
 class _UserCategoryState extends State<UserCategory> {
-  final DBHelper dbHelper = DBHelper();
+  final ApiService apiService = ApiService();
+
   List categories = [];
   List filteredCategories = [];
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -19,19 +21,31 @@ class _UserCategoryState extends State<UserCategory> {
     loadData();
   }
 
-  void loadData() async {
-    final data = await dbHelper.getCategories(); // 🔥 pastikan ini ada di DBHelper
-    setState(() {
-      categories = data;
-      filteredCategories = data;
-    });
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
   }
 
-  // 🔍 SEARCH
+  // AMBIL DATA DARI API
+  Future<void> loadData() async {
+    final data = await apiService.getCategories();
+
+    if (mounted) {
+      setState(() {
+        categories = data;
+        filteredCategories = data;
+      });
+    }
+  }
+
+  // FUNGSI SEARCH
   void searchCategory(String keyword) {
     final result = categories.where((item) {
-      final name = item['name'].toString().toLowerCase();
-      return name.contains(keyword.toLowerCase());
+      final name = (item['name'] ?? '').toString().toLowerCase();
+      final desc = (item['description'] ?? '').toString().toLowerCase();
+      return name.contains(keyword.toLowerCase()) ||
+          desc.contains(keyword.toLowerCase());
     }).toList();
 
     setState(() {
@@ -42,102 +56,99 @@ class _UserCategoryState extends State<UserCategory> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFF5F5F5),
-      body: SafeArea(
-        child: Column(
-          children: [
-            const SizedBox(height: 20),
+      backgroundColor: Colors.grey[200],
 
-            // TITLE
-            const Padding(
-              padding: EdgeInsets.symmetric(horizontal: 16),
-              child: Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  "CATEGORIES",
-                  style: TextStyle(
-                    fontSize: 28,
-                    fontWeight: FontWeight.bold,
+      appBar: AppBar(
+        title: const Text("Category"),
+      ),
+
+      body: SafeArea(
+        child: Padding(
+          padding: const EdgeInsets.all(16),
+
+          child: Column(
+            children: [
+              const Text(
+                "CATEGORY",
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 15),
+
+              // SEARCH BAR (SAMA PERSIS DENGAN ADMIN)
+              TextField(
+                controller: _searchController,
+                onChanged: searchCategory,
+                decoration: InputDecoration(
+                  hintText: "SEARCH CATEGORY",
+                  filled: true,
+                  fillColor: Colors.grey[300],
+                  prefixIcon: const Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(8),
+                    borderSide: BorderSide.none,
                   ),
                 ),
               ),
-            ),
 
-            const SizedBox(height: 15),
+              const SizedBox(height: 15),
 
-            // 🔍 SEARCH BAR
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                height: 50,
-                decoration: BoxDecoration(
-                  color: Colors.grey[300],
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Row(
-                  children: [
-                    const Icon(Icons.search),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: TextField(
-                        onChanged: searchCategory,
-                        decoration: const InputDecoration(
-                          hintText: "Search categories...",
-                          border: InputBorder.none,
+              // LIST CATEGORY (TANPA TOMBOL EDIT/DELETE/ADD)
+              Expanded(
+                child: filteredCategories.isEmpty
+                    ? const Center(
+                        child: Text(
+                          "Belum ada kategori",
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+                      )
+                    : ListView.builder(
+                        itemCount: filteredCategories.length,
+                        itemBuilder: (context, index) {
+                          final item = filteredCategories[index];
 
-            const SizedBox(height: 15),
+                          return Container(
+                            margin: const EdgeInsets.only(
+                              bottom: 10,
+                            ),
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        item['name'] ?? '',
+                                        style: const TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
 
-            // 📦 LIST CATEGORY
-            Expanded(
-              child: filteredCategories.isEmpty
-                  ? const Center(
-                      child: Text(
-                        "No categories found",
-                        style: TextStyle(color: Colors.black38),
-                      ),
-                    )
-                  : ListView.builder(
-                      padding: const EdgeInsets.symmetric(horizontal: 16),
-                      itemCount: filteredCategories.length,
-                      itemBuilder: (context, index) {
-                        var category = filteredCategories[index];
+                                      const SizedBox(height: 4),
 
-                        return Container(
-                          margin: const EdgeInsets.only(bottom: 12),
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            color: Colors.grey[300],
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: Row(
-                            children: [
-                              const Icon(Icons.category),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  category['name'] ?? '',
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                                      Text(
+                                        item['description'] ?? '',
+                                      ),
+                                    ],
                                   ),
                                 ),
-                              ),
-                              const Icon(Icons.arrow_forward_ios, size: 18),
-                            ],
-                          ),
-                        );
-                      },
-                    ),
-            ),
-          ],
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+              ),
+            ],
+          ),
         ),
       ),
     );
