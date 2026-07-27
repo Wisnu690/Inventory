@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
-// ⚠️ Pastikan path ke ApiService ini benar di project kamu
+// ⚠️ Pastikan path ke ApiService ini sesuai dengan struktur folder project kamu
 import 'package:inventory/data/api/api_service.dart';
 
 class Scanner extends StatefulWidget {
@@ -272,19 +272,19 @@ class _ScannerState extends State<Scanner> {
 
                               setModalState(() => isSubmitting = true);
 
-                              // 🔥 PANGGIL API SIMPAN STOK (STOCK IN / STOCK OUT)
+                              // 🔥 PANGGIL API SIMPAN STOK
                               Map<String, dynamic> response;
                               if (transactionType == 'IN') {
                                 response = await _apiService.stockIn(
                                   itemId: itemId,
-                                  userId: 1, // Ganti dengan ID User aktif jika ada
+                                  userId: 1, // Sesuaikan dengan User ID aktif
                                   quantity: qty,
                                   notes: notesController.text.isEmpty ? null : notesController.text,
                                 );
                               } else {
                                 response = await _apiService.stockOut(
                                   itemId: itemId,
-                                  userId: 1, // Ganti dengan ID User aktif jika ada
+                                  userId: 1, // Sesuaikan dengan User ID aktif
                                   quantity: qty,
                                   notes: notesController.text.isEmpty ? null : notesController.text,
                                 );
@@ -448,7 +448,7 @@ class _ScannerState extends State<Scanner> {
 }
 
 // -----------------------------------------------------------------
-// 📸 KAMERA SCANNER DENGAN CONTROLLER MANAGEMENT
+// 📸 KAMERA SCANNER DENGAN OVERLAY FOKUS BARCODE
 // -----------------------------------------------------------------
 class CameraScannerScreen extends StatefulWidget {
   const CameraScannerScreen({super.key});
@@ -490,23 +490,116 @@ class _CameraScannerScreenState extends State<CameraScannerScreen> {
           ),
         ],
       ),
-      body: MobileScanner(
-        controller: _controller,
-        onDetect: (capture) {
-          if (_isScanned) return;
+      body: Stack(
+        children: [
+          // 1. Kamera Scanner Utama
+          MobileScanner(
+            controller: _controller,
+            onDetect: (capture) {
+              if (_isScanned) return;
 
-          final List<Barcode> barcodes = capture.barcodes;
-          for (final barcode in barcodes) {
-            if (barcode.rawValue != null && barcode.rawValue!.isNotEmpty) {
-              setState(() {
-                _isScanned = true;
-              });
-              Navigator.pop(context, barcode.rawValue);
-              break;
-            }
-          }
-        },
+              final List<Barcode> barcodes = capture.barcodes;
+              for (final barcode in barcodes) {
+                if (barcode.rawValue != null && barcode.rawValue!.isNotEmpty) {
+                  setState(() {
+                    _isScanned = true;
+                  });
+                  Navigator.pop(context, barcode.rawValue);
+                  break;
+                }
+              }
+            },
+          ),
+
+          // 2. Overlay Kotak Area Fokus Barcode (Sudah Dinaikkan)
+          CustomPaint(
+            size: Size.infinite,
+            painter: ScannerOverlayPainter(
+              scanBoxWidth: 280,   // Lebar kotak
+              scanBoxHeight: 180,  // Tinggi kotak
+              verticalOffset: -100, // 👈 Nilai negatif (-100) membuat kotak berpindah ke atas
+            ),
+          ),
+
+          // 3. Teks Petunjuk untuk Pengguna (Disesuaikan Posisinya di Bawah Kotak)
+          Positioned(
+            top: MediaQuery.of(context).size.height * 0.48,
+            left: 0,
+            right: 0,
+            child: Column(
+              children: const [
+                Icon(Icons.qr_code_scanner, color: Colors.white70, size: 30),
+                SizedBox(height: 8),
+                Text(
+                  "Posisikan Barcode / QR di dalam kotak",
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
+}
+
+// -----------------------------------------------------------------
+// 🎨 PAINTER UNTUK MEMBUAT EFEK BAGIAN GELAP DAN LUBANG FOKUS
+// -----------------------------------------------------------------
+class ScannerOverlayPainter extends CustomPainter {
+  final Color overlayColor;
+  final double scanBoxWidth;
+  final double scanBoxHeight;
+  final double borderRadius;
+  final double verticalOffset; // Mengontrol posisi vertikal kotak
+
+  ScannerOverlayPainter({
+    this.overlayColor = const Color.fromRGBO(0, 0, 0, 0.6),
+    this.scanBoxWidth = 280,
+    this.scanBoxHeight = 180,
+    this.borderRadius = 16,
+    this.verticalOffset = -100, // Default dinaikkan 100px dari tengah
+  });
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final backgroundPaint = Paint()..color = overlayColor;
+
+    // Garis bingkai putih untuk kotak fokus
+    final borderPaint = Paint()
+      ..color = Colors.white
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 3;
+
+    // Posisi kotak dengan offset vertikal
+    final scanRect = Rect.fromCenter(
+      center: Offset(size.width / 2, (size.height / 2) + verticalOffset),
+      width: scanBoxWidth,
+      height: scanBoxHeight,
+    );
+
+    final scanRRect = RRect.fromRectAndRadius(
+      scanRect,
+      Radius.circular(borderRadius),
+    );
+
+    // Membuat "lubang" bening pada layar gelap
+    final path = Path()
+      ..addRect(Rect.fromLTWH(0, 0, size.width, size.height))
+      ..addRRect(scanRRect)
+      ..fillType = PathFillType.evenOdd;
+
+    // Gambar background gelap berlubang
+    canvas.drawPath(path, backgroundPaint);
+
+    // Gambar garis bingkai putih
+    canvas.drawRRect(scanRRect, borderPaint);
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

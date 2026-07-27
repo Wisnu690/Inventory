@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
-// ⚠️ Path ke ApiService disesuaikan dengan struktur folder kamu
-import '../data/api/api_service.dart';
+import '../data/api/api_service.dart'; // ⚠️ Sesuaikan path ApiService kamu
 
 class UserHistory extends StatefulWidget {
   final int? userId; // Menerima ID user yang sedang login
@@ -83,7 +82,7 @@ class _UserHistoryState extends State<UserHistory> {
             children: [
               const SizedBox(height: 10),
 
-              // 🔥 TITLE
+              // TITLE
               const Text(
                 "HISTORY",
                 style: TextStyle(
@@ -94,7 +93,7 @@ class _UserHistoryState extends State<UserHistory> {
 
               const SizedBox(height: 20),
 
-              // 🔥 FILTER BUTTONS
+              // FILTER BUTTONS
               Row(
                 children: [
                   _filterButton("ALL"),
@@ -107,7 +106,7 @@ class _UserHistoryState extends State<UserHistory> {
 
               const SizedBox(height: 20),
 
-              // 🔥 DYNAMIC LIST HISTORY
+              // DYNAMIC LIST HISTORY
               Expanded(
                 child: isLoading
                     ? const Center(
@@ -160,7 +159,7 @@ class _UserHistoryState extends State<UserHistory> {
     );
   }
 
-  // 🔥 FILTER BUTTON WIDGET
+  // FILTER BUTTON WIDGET
   Widget _filterButton(String text) {
     bool isActive = selectedFilter == text;
 
@@ -185,7 +184,7 @@ class _UserHistoryState extends State<UserHistory> {
     );
   }
 
-  // 🔥 HISTORY CARD WIDGET
+  // HISTORY CARD WIDGET
   Widget _historyCard({required dynamic item, required bool isIn}) {
     // Penanganan relasi ke Item secara aman
     final dynamic rawItemData = item is Map ? item['item'] : null;
@@ -204,6 +203,8 @@ class _UserHistoryState extends State<UserHistory> {
                 .toString()) ??
         0;
 
+    final String notes = (item['notes'] ?? item['description'] ?? '').toString();
+
     // Format tanggal aman dari Null / RangeError
     String rawDate = (item['created_at'] ?? item['date'] ?? '').toString();
     String displayDate = '';
@@ -217,70 +218,88 @@ class _UserHistoryState extends State<UserHistory> {
         color: Colors.grey[200],
         borderRadius: BorderRadius.circular(14),
       ),
-      child: Row(
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // LEFT ICON
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: Colors.grey[300],
-              borderRadius: BorderRadius.circular(10),
-            ),
-            child: const Icon(Icons.sync_alt, color: Colors.black54), // 👈 Perbaikan warna di sini
-          ),
-
-          const SizedBox(width: 12),
-
-          // TEXT DETAILS
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  itemName,
-                  style: const TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 14,
-                  ),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  "SKU: $sku ${displayDate.isNotEmpty ? '• $displayDate' : ''}",
-                  style: const TextStyle(
-                    fontSize: 11,
-                    color: Colors.grey,
-                  ),
-                ),
-              ],
-            ),
-          ),
-
-          // QTY & RIGHT ICON (IN / OUT)
           Row(
             children: [
-              Text(
-                "${isIn ? '+' : '-'}$amount",
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  fontSize: 14,
-                  color: isIn ? Colors.green[700] : Colors.red[700],
-                ),
-              ),
-              const SizedBox(width: 8),
+              // LEFT ICON
               Container(
-                padding: const EdgeInsets.all(8),
+                padding: const EdgeInsets.all(10),
                 decoration: BoxDecoration(
-                  color: isIn ? Colors.green[100] : Colors.red[100],
+                  color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: Icon(
-                  isIn ? Icons.download : Icons.upload,
-                  size: 18,
-                  color: isIn ? Colors.green[800] : Colors.red[800],
+                child: const Icon(Icons.sync_alt, color: Colors.black54),
+              ),
+
+              const SizedBox(width: 12),
+
+              // TEXT DETAILS
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      itemName,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      "SKU: $sku ${displayDate.isNotEmpty ? '• $displayDate' : ''}",
+                      style: const TextStyle(
+                        fontSize: 11,
+                        color: Colors.grey,
+                      ),
+                    ),
+                  ],
                 ),
+              ),
+
+              // QTY & RIGHT ICON (IN / OUT)
+              Row(
+                children: [
+                  Text(
+                    "${isIn ? '+' : '-'}$amount",
+                    style: TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                      color: isIn ? Colors.green[700] : Colors.red[700],
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Container(
+                    padding: const EdgeInsets.all(8),
+                    decoration: BoxDecoration(
+                      color: isIn ? Colors.green[100] : Colors.red[100],
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: Icon(
+                      isIn ? Icons.download : Icons.upload,
+                      size: 18,
+                      color: isIn ? Colors.green[800] : Colors.red[800],
+                    ),
+                  ),
+                ],
               ),
             ],
           ),
+
+          // CATATAN / NOTES (JIKA ADA)
+          if (notes.isNotEmpty) ...[
+            const SizedBox(height: 8),
+            Text(
+              "Catatan: $notes",
+              style: TextStyle(
+                fontSize: 12,
+                fontStyle: FontStyle.italic,
+                color: Colors.grey[700],
+              ),
+            ),
+          ],
         ],
       ),
     );

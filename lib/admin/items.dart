@@ -15,6 +15,10 @@ class _ItemsState extends State<Items> {
   List categories = [];
   bool isLoading = true;
 
+  // 🔍 CONTROLLER & STATE UNTUK FITUR SEARCH
+  final TextEditingController searchController = TextEditingController();
+  String searchQuery = '';
+
   // 📱 DAFTAR MERK / BRAND
   final List<String> brandList = [
     'Samsung',
@@ -41,6 +45,31 @@ class _ItemsState extends State<Items> {
     loadData();
   }
 
+  @override
+  void dispose() {
+    searchController.dispose();
+    super.dispose();
+  }
+
+  // 🔄 LOGIKA FILTERING SEARCH (Lokal Filtering)
+  List get filteredItems {
+    if (searchQuery.isEmpty) return items;
+
+    final query = searchQuery.toLowerCase();
+    return items.where((item) {
+      final name = (item['name'] ?? '').toString().toLowerCase();
+      final sku = (item['sku'] ?? '').toString().toLowerCase();
+      final brand = (item['brand'] ?? '').toString().toLowerCase();
+      final barcode = (item['barcode'] ?? '').toString().toLowerCase();
+
+      // Cari berdasarkan nama, sku, brand, atau barcode
+      return name.contains(query) ||
+          sku.contains(query) ||
+          brand.contains(query) ||
+          barcode.contains(query);
+    }).toList();
+  }
+
   // 🔄 LOAD DATA ITEMS & CATEGORIES DARI API
   Future<void> loadData() async {
     setState(() => isLoading = true);
@@ -56,7 +85,7 @@ class _ItemsState extends State<Items> {
         });
       }
     } catch (e) {
-      print("Error saat load data: $e");
+      debugPrint("Error saat load data: $e");
     } finally {
       if (mounted) {
         setState(() => isLoading = false);
@@ -109,7 +138,7 @@ class _ItemsState extends State<Items> {
                           ),
                         )
                       : DropdownButtonFormField<int>(
-                          isExpanded: true, // 👈 CEGAH OVERFLOW HORISONAL
+                          isExpanded: true,
                           value: selectedCategoryId,
                           decoration: const InputDecoration(labelText: "Kategori"),
                           items: categories.map<DropdownMenuItem<int>>((cat) {
@@ -117,7 +146,7 @@ class _ItemsState extends State<Items> {
                               value: cat['id'],
                               child: Text(
                                 cat['name'] ?? 'Kategori ${cat['id']}',
-                                overflow: TextOverflow.ellipsis, // 👈 POTONG TEKS
+                                overflow: TextOverflow.ellipsis,
                               ),
                             );
                           }).toList(),
@@ -133,7 +162,7 @@ class _ItemsState extends State<Items> {
 
                   // 🔽 DROPDOWN MERK / BRAND
                   DropdownButtonFormField<String>(
-                    isExpanded: true, // 👈 CEGAH OVERFLOW HORISONAL
+                    isExpanded: true,
                     value: selectedBrand,
                     decoration: const InputDecoration(labelText: "Brand / Merk"),
                     items: brandList.map<DropdownMenuItem<String>>((brand) {
@@ -141,7 +170,7 @@ class _ItemsState extends State<Items> {
                         value: brand,
                         child: Text(
                           brand,
-                          overflow: TextOverflow.ellipsis, // 👈 POTONG TEKS JIKA TERLALU PANJANG
+                          overflow: TextOverflow.ellipsis,
                         ),
                       );
                     }).toList(),
@@ -265,7 +294,7 @@ class _ItemsState extends State<Items> {
                   categories.isEmpty
                       ? const Text("Kategori tidak tersedia", style: TextStyle(color: Colors.red))
                       : DropdownButtonFormField<int>(
-                          isExpanded: true, // 👈 CEGAH OVERFLOW
+                          isExpanded: true,
                           value: selectedCategoryId,
                           decoration: const InputDecoration(labelText: "Kategori"),
                           items: categories.map<DropdownMenuItem<int>>((cat) {
@@ -289,7 +318,7 @@ class _ItemsState extends State<Items> {
 
                   // 🔽 DROPDOWN MERK / BRAND
                   DropdownButtonFormField<String>(
-                    isExpanded: true, // 👈 CEGAH OVERFLOW
+                    isExpanded: true,
                     value: selectedBrand,
                     decoration: const InputDecoration(labelText: "Brand / Merk"),
                     items: brandList.map<DropdownMenuItem<String>>((brand) {
@@ -383,6 +412,9 @@ class _ItemsState extends State<Items> {
 
   @override
   Widget build(BuildContext context) {
+    // Ambil list item yang sudah difilter
+    final displayItems = filteredItems;
+
     return Scaffold(
       backgroundColor: Colors.grey[200],
       appBar: AppBar(
@@ -421,13 +453,30 @@ class _ItemsState extends State<Items> {
 
               const SizedBox(height: 15),
 
-              // SEARCH BAR
+              // 🔍 SEARCH BAR DENGAN DUKUNGAN REALTIME SEARCH
               TextField(
+                controller: searchController,
+                onChanged: (value) {
+                  setState(() {
+                    searchQuery = value;
+                  });
+                },
                 decoration: InputDecoration(
                   hintText: "SEARCH ITEMS",
                   filled: true,
                   fillColor: Colors.grey[300],
                   prefixIcon: const Icon(Icons.search),
+                  suffixIcon: searchQuery.isNotEmpty
+                      ? IconButton(
+                          icon: const Icon(Icons.clear),
+                          onPressed: () {
+                            setState(() {
+                              searchController.clear();
+                              searchQuery = '';
+                            });
+                          },
+                        )
+                      : null,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(8),
                     borderSide: BorderSide.none,
@@ -441,14 +490,19 @@ class _ItemsState extends State<Items> {
               Expanded(
                 child: isLoading
                     ? const Center(child: CircularProgressIndicator())
-                    : items.isEmpty
-                        ? const Center(
-                            child: Text("Belum ada item"),
+                    : displayItems.isEmpty
+                        ? Center(
+                            child: Text(
+                              searchQuery.isEmpty
+                                  ? "Belum ada item"
+                                  : "Item '$searchQuery' tidak ditemukan",
+                              style: const TextStyle(color: Colors.grey),
+                            ),
                           )
                         : ListView.builder(
-                            itemCount: items.length,
+                            itemCount: displayItems.length,
                             itemBuilder: (context, index) {
-                              final item = items[index];
+                              final item = displayItems[index];
 
                               return Container(
                                 margin: const EdgeInsets.only(bottom: 10),
